@@ -3,7 +3,6 @@ package io.github.angel.raa.utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.Normalizer;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**

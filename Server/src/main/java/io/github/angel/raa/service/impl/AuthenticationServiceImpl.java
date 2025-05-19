@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
+// TODO: SOLUCIONA EN PROBLEMA DE LOGIN
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtTokenProvider jwtTokenProvider;
@@ -104,11 +104,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public UUID getCurrentUserId() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
-            return repository.findByUsername(username).map(User::getUserId).orElse(null);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authentication: " + authentication); // Debug
+        System.out.println("Principal type: " + (authentication != null ? authentication.getPrincipal().getClass() : "null")); // Debug
+
+        if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails)) {
+            throw new UnauthorizedException("User not authenticated or invalid user details");
         }
-        throw new UnauthorizedException("User not authenticated or invalid user details");
+
+        String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+        return repository.findByUsername(username)
+                .map(User::getUserId)
+                .orElseThrow(() -> new UnauthorizedException("User not found in database"));
     }
 }

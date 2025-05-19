@@ -12,16 +12,18 @@ import io.github.angel.raa.persistence.repository.PostRepository;
 import io.github.angel.raa.service.AuthenticationService;
 import io.github.angel.raa.service.PostService;
 import io.github.angel.raa.utils.Slugify;
-import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+// TODO: LOGICA IMPL DE POST
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -63,18 +65,31 @@ public class PostServiceImpl implements PostService {
     public Response<PostResponseDTO> getPostBySlug(String slug) {
         return null;
     }
-
+    @Transactional(readOnly = true)
     @Override
-    public List<PostResponseDTO> getAllPosts() {
-        return List.of();
+    public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
+        Page<Post> posts = postRepository.findAll(pageable);
+        return posts.map(PostResponseDTO::fromPost);
     }
 
     @Override
     public Response<String> deletePost(String slug) {
         return null;
     }
+
+    @Override
+    public Response<String> addCategoryToPost(String slug, Long categoryId) {
+        return null;
+    }
+
+    @Override
+    public Response<String> removeCategoryFromPost(String slug, Long categoryId) {
+        return null;
+    }
+
     private void mapDtoToPost(@NotNull PostDto postDto, @NotNull Post post) {
         UUID currentUserId = authenticationService.getCurrentUserId();
+        System.out.println(currentUserId);
         String slug = Slugify.slugify(postDto.title());
         post.setTitle(postDto.title());
         post.setSlug(slug);

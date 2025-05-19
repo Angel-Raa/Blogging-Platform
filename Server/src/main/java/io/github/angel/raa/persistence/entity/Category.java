@@ -1,6 +1,7 @@
 package io.github.angel.raa.persistence.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String slug;
     @Column(nullable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
     @ManyToMany(mappedBy = "categories")
     private Set<Post> posts = new HashSet<>();

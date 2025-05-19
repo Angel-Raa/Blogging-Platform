@@ -70,6 +70,7 @@ public class HttpSecurityConfiguration {
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST,"/authentication/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
                 .anyRequest().authenticated());
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));// Proteger contra clickjacking
