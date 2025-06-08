@@ -53,7 +53,7 @@ public class Response <T> implements  Serializable{
         return this;
     }
     public Response<T> buildResponse() {
-        return new Response(message, data, success, code);
+        return new Response<T>(message, data, success, code);
     }
     @Contract(" -> new")
     public static <T> @NotNull Response<T> builder() {
