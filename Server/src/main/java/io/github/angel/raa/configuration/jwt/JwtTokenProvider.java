@@ -1,5 +1,6 @@
 package io.github.angel.raa.configuration.jwt;
 
+import io.github.angel.raa.persistence.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.jetbrains.annotations.Contract;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -28,15 +28,19 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes() );
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(User userDetails) {
         return generateToken(Map.of(), userDetails);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, @NotNull UserDetails userDetails){
+
+
+    public String generateToken(Map<String, Object> extraClaims, @NotNull User userDetails){
         return Jwts
                 .builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
+                .claim("email", userDetails.getEmail())
+                .claim("role", userDetails.getAuthorities())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
                 .signWith(getSigningKey())

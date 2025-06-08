@@ -40,6 +40,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
+    @PreAuthorize("permitAll")
     public ResponseEntity<Response<AuthenticateResponse>> register(@Valid @RequestBody Register register){
         CompromisedPasswordDecision decision = compromisedPasswordChecker.check(register.password());
         if (register.password().length() < 8) {
@@ -54,6 +55,7 @@ public class AuthenticationController {
         return new ResponseEntity<>(response, response.isSuccess() ? HttpStatus.OK : BAD_REQUEST);
     }
     @PostMapping("/login")
+    @PreAuthorize("permitAll")
     public ResponseEntity<Response<AuthenticateResponse>> login(@Valid @RequestBody Login login){
         Response<AuthenticateResponse> response = authenticationService.login(login);
         return new ResponseEntity<>(response, response.isSuccess() ? HttpStatus.OK : BAD_REQUEST);

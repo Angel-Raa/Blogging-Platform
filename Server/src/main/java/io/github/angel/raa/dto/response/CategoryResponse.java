@@ -1,5 +1,7 @@
 package io.github.angel.raa.dto.response;
 
+import io.github.angel.raa.persistence.entity.Category;
+
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -31,5 +33,9 @@ public class CategoryResponse implements Serializable {
 
     public void setSlug(String slug) {
         this.slug = slug;
+    }
+
+    public static CategoryResponse fromCategory(Category category) {
+        return new CategoryResponse(category.getName(), category.getSlug());
     }
 }

@@ -10,6 +10,9 @@ import io.github.angel.raa.utils.Slugify;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,18 +21,17 @@ import java.time.LocalDateTime;
 @Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository repository;
-    public CategoryServiceImpl(CategoryRepository repository) {
+    private final PagedResourcesAssembler<CategoryResponse> pagedResourcesAssembler;
+    public CategoryServiceImpl(CategoryRepository repository, PagedResourcesAssembler<CategoryResponse> pagedResourcesAssembler) {
         this.repository = repository;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
     @Transactional
     @Override
     public Response<CategoryResponse> createCategory(CategoryDTO dto) {
-        if(repository.existsBySlug(Slugify.slugify(dto.name()))){
-            throw new IllegalArgumentException("Category already exists");
-        }
-
         Category category = new Category();
-        mapDtoToCategory(dto, category);
+        category.setSlug(Slugify.slugify(dto.name()));
+        category.setName(dto.name());
         repository.save(category);
         CategoryResponse response = new CategoryResponse();
         response.setName(category.getName());
@@ -58,14 +60,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
     @Transactional(readOnly = true)
     @Override
-    public Page<CategoryResponse> getAllCategories(Pageable pageable) {
+    public PagedModel<EntityModel<CategoryResponse>> getAllCategories(Pageable pageable) {
         Page<Category> categories = repository.findAll(pageable);
-        return  categories.map(category -> new CategoryResponse(category.getName(), category.getSlug()));
+        Page<CategoryResponse> responsePage = categories.map(category ->
+                new CategoryResponse(category.getName(), category.getSlug()));
+        return pagedResourcesAssembler.toModel(responsePage);
     }
 
-    private void mapDtoToCategory(@NotNull CategoryDTO dto, @NotNull Category category) {
-        category.setName(dto.name());
-        category.setSlug(Slugify.slugify(dto.name()));
-
-    }
 }

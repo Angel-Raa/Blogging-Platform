@@ -4,7 +4,6 @@ import io.github.angel.raa.configuration.jwt.JwtAuthEntryPoint;
 import io.github.angel.raa.configuration.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
@@ -26,9 +25,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-@EnableWebSecurity
 @Configuration
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class HttpSecurityConfiguration {
     private final UserDetailsService userDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
@@ -68,9 +66,6 @@ public class HttpSecurityConfiguration {
         http.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint));
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST,"/authentication/**").permitAll()
-                .anyRequest().authenticated());
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));// Proteger contra clickjacking
         http.httpBasic(AbstractHttpConfigurer::disable);

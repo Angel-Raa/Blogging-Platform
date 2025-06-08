@@ -1,14 +1,17 @@
 package io.github.angel.raa.service.impl;
 
+import io.github.angel.raa.dto.request.category.CategoryDTO;
 import io.github.angel.raa.dto.request.post.PostDto;
 import io.github.angel.raa.dto.response.PostResponseDTO;
 import io.github.angel.raa.dto.response.Response;
 import io.github.angel.raa.exception.DuplicateSlugException;
 import io.github.angel.raa.exception.DuplicateTitleException;
-import io.github.angel.raa.persistence.entity.Category;
+import io.github.angel.raa.exception.UsernameNotFoundException;
 import io.github.angel.raa.persistence.entity.Post;
+import io.github.angel.raa.persistence.entity.User;
 import io.github.angel.raa.persistence.repository.CategoryRepository;
 import io.github.angel.raa.persistence.repository.PostRepository;
+import io.github.angel.raa.persistence.repository.UserRepository;
 import io.github.angel.raa.service.AuthenticationService;
 import io.github.angel.raa.service.PostService;
 import io.github.angel.raa.utils.Slugify;
@@ -19,19 +22,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.ZoneId;
+import java.time.temporal.Temporal;
 import java.util.UUID;
 import java.util.stream.Collectors;
-// TODO: LOGICA IMPL DE POST
+
 
 @Service
 public class PostServiceImpl implements PostService {
+    private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final AuthenticationService authenticationService;
     private final CategoryRepository categoryRepository;
 
-    public PostServiceImpl(PostRepository postRepository, AuthenticationService authenticationService, CategoryRepository categoryRepository) {
+    public PostServiceImpl(UserRepository userRepository, PostRepository postRepository, AuthenticationService authenticationService, CategoryRepository categoryRepository) {
+        this.userRepository = userRepository;
         this.postRepository = postRepository;
         this.authenticationService = authenticationService;
         this.categoryRepository = categoryRepository;
@@ -41,9 +46,15 @@ public class PostServiceImpl implements PostService {
     @Override
     public Response<PostResponseDTO> createPost(@NotNull PostDto postDto) {
         validateUniqueTitleAndSlug(postDto.title(), Slugify.slugify(postDto.title()));
-        Post post = new Post();
-        mapDtoToPost(postDto, post);
-        PostResponseDTO dto = mapEntityToDto( postRepository.save(post));
+        UUID authorId = authenticationService.getCurrentUserId();
+        User user = userRepository.findById(authorId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Post post = mapDtoToPost(postDto);
+        post.setAuthorId(authorId);
+        post.setAuthor(user);
+        System.out.println("User en Post " + authenticationService.getCurrentUserId());
+        Post postSave = postRepository.save(post);
+        System.out.println("Post saved " + postSave);
+        PostResponseDTO dto = PostResponseDTO.fromPost( postSave );
         return Response.<PostResponseDTO>builder()
                 .message("Post created successfully")
                 .success(true)
@@ -87,31 +98,17 @@ public class PostServiceImpl implements PostService {
         return null;
     }
 
-    private void mapDtoToPost(@NotNull PostDto postDto, @NotNull Post post) {
-        UUID currentUserId = authenticationService.getCurrentUserId();
-        System.out.println(currentUserId);
-        String slug = Slugify.slugify(postDto.title());
+    private Post mapDtoToPost(@NotNull PostDto postDto) {
+        Post post = new Post();
         post.setTitle(postDto.title());
-        post.setSlug(slug);
+        post.setSlug(Slugify.slugify(postDto.title()));
         post.setContent(postDto.content());
-        try {
-            post.setStatus(postDto.status());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid status: " + postDto.status());
-        }
-        post.setAuthorId(currentUserId);
-        if (postDto.categoryIds() != null) {
-            Set<Category> categories = postDto.categoryIds().stream()
-                    .map(categoryId -> categoryRepository.findById(categoryId)
-                            .orElseThrow(() -> new IllegalArgumentException("Category not found with id: " + categoryId)))
-                    .collect(Collectors.toSet());
-            post.setCategories(categories);
-        } else {
-            post.setCategories(new HashSet<>());
-        }
-        if (post.getStatus() == Post.PostStatus.PUBLISHED && post.getPublishedAt() == null) {
-            post.setPublishedAt(LocalDateTime.now());
-        }
+        post.setStatus(postDto.status());
+        post.setPublishedAt(LocalDateTime.now(ZoneId.of("UTC")));
+        post.setPublishedAt(LocalDateTime.now());
+        post.setCategoryId(postDto.categoryId());
+        return post;
+
     }
 
     private void validateUniqueTitle(String title) {
@@ -132,7 +129,22 @@ public class PostServiceImpl implements PostService {
     }
 
     private PostResponseDTO mapEntityToDto(Post save) {
-        return PostResponseDTO.fromPost(save);
+        PostResponseDTO  dto = new PostResponseDTO();
+        dto.setPostId(save.getPostId());
+        dto.setTitle(save.getTitle());
+        dto.setSlug(save.getSlug());
+        dto.setContent(save.getContent());
+        dto.setStatus(save.getStatus());
+        dto.setPublishedAt(save.getPublishedAt());
+        dto.setCreatedAt(save.getCreatedAt());
+        dto.setUpdatedAt(save.getUpdatedAt());
+        dto.setAuthorId(save.getAuthorId());
+        dto.setAuthorName(save.getAuthor().getUsername());
+        dto.setCategories(save.getCategories().stream().map(CategoryDTO::fromCategory).collect(Collectors.toSet()));
+
+
+        return dto;
+
     }
 
 

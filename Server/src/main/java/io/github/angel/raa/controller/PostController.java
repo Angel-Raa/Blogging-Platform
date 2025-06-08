@@ -7,6 +7,7 @@ import io.github.angel.raa.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -22,13 +23,14 @@ public class PostController {
     public PostController(PostService postService) {
         this.postService = postService;
     }
-
+    @PreAuthorize("permitAll")
     @GetMapping
     public ResponseEntity<Page<PostResponseDTO>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Page<PostResponseDTO> posts = postService.getAllPosts(PageRequest.of(page, size));
+        System.out.println("Posts:   " + posts);
         return ResponseEntity.ok(posts);
 
     }
@@ -44,8 +46,14 @@ public class PostController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR', 'USER')")
     @PostMapping
     public ResponseEntity<Response<PostResponseDTO>> createPost(@Valid @RequestBody PostDto postDto) {
+
+        System.out.println("Datos recibidos:");
+        System.out.println("Title: " + postDto.title());
+        System.out.println("Content: " + postDto.content());
+        System.out.println("Status: " + postDto.status());
+        System.out.println("CategoryId: " + postDto.categoryId());
         Response<PostResponseDTO> response = postService.createPost(postDto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 

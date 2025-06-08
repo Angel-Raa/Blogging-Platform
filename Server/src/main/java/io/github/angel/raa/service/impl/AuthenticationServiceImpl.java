@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-// TODO: SOLUCIONA EN PROBLEMA DE LOGIN
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtTokenProvider jwtTokenProvider;
@@ -54,7 +53,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(!repository.existsByUsername(username)){
             throw new UsernameNotFoundException("El nombre de usuario no existe.");
         }
-        UserDetails details = repository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Sorry, we couldn't find the user you're looking for. Please double-check the entered information and try again."));
+        User details = repository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Sorry, we couldn't find the user you're looking for. Please double-check the entered information and try again."));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
 

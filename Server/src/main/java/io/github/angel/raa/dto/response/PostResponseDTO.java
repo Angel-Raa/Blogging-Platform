@@ -3,12 +3,15 @@ package io.github.angel.raa.dto.response;
 import io.github.angel.raa.dto.request.category.CategoryDTO;
 import io.github.angel.raa.persistence.entity.Post;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class PostResponseDTO {
+public class PostResponseDTO implements Serializable {
+    private static final Long serialVersionUID = 21342872346236879l;
     private UUID postId;
     private String title;
     private String slug;
@@ -19,7 +22,7 @@ public class PostResponseDTO {
     private LocalDateTime updatedAt;
     private UUID authorId;
     private String authorName;
-    private Set<CategoryDTO> categories;
+    private Set<CategoryDTO> categories = new HashSet<>();
 
     public PostResponseDTO() {
     }
@@ -138,7 +141,6 @@ public class PostResponseDTO {
                 post.getUpdatedAt(),
                 post.getAuthorId(),
                 post.getAuthor().getUsername(),
-                post.getCategories().stream().map(CategoryDTO::fromCategory).collect(Collectors.toSet())
-        );
+                post.getCategories().stream().map(CategoryDTO::fromCategory).collect(Collectors.toSet()));
     }
 }

@@ -16,7 +16,7 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, name = "post_id")
     private UUID postId;
-    @Column(nullable = true, insertable = true, name = "user_id")
+    @Column(nullable = true, insertable = true, name = "user_id", updatable = true)
     private UUID authorId;
     @Column(nullable = true, insertable = true, name = "category_id")
     private UUID  categoryId;
@@ -33,7 +33,7 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     private User author;
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
