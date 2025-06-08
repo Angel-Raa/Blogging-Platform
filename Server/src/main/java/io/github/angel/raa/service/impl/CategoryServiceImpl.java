@@ -7,7 +7,6 @@ import io.github.angel.raa.persistence.entity.Category;
 import io.github.angel.raa.persistence.repository.CategoryRepository;
 import io.github.angel.raa.service.CategoryService;
 import io.github.angel.raa.utils.Slugify;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -17,15 +16,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-// TODO: LOGICA IMPL DE CATEGORY
+
 @Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository repository;
     private final PagedResourcesAssembler<CategoryResponse> pagedResourcesAssembler;
-    public CategoryServiceImpl(CategoryRepository repository, PagedResourcesAssembler<CategoryResponse> pagedResourcesAssembler) {
+
+    public CategoryServiceImpl(CategoryRepository repository,
+            PagedResourcesAssembler<CategoryResponse> pagedResourcesAssembler) {
         this.repository = repository;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
+
     @Transactional
     @Override
     public Response<CategoryResponse> createCategory(CategoryDTO dto) {
@@ -58,12 +60,13 @@ public class CategoryServiceImpl implements CategoryService {
     public Response<String> deleteCategory(String slug) {
         return null;
     }
+
     @Transactional(readOnly = true)
     @Override
     public PagedModel<EntityModel<CategoryResponse>> getAllCategories(Pageable pageable) {
         Page<Category> categories = repository.findAll(pageable);
-        Page<CategoryResponse> responsePage = categories.map(category ->
-                new CategoryResponse(category.getName(), category.getSlug()));
+        Page<CategoryResponse> responsePage = categories
+                .map(category -> new CategoryResponse(category.getName(), category.getSlug(), category.getCategoryId()));
         return pagedResourcesAssembler.toModel(responsePage);
     }
 

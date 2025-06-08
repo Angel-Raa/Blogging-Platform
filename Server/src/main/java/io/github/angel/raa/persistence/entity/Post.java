@@ -1,8 +1,10 @@
 package io.github.angel.raa.persistence.entity;
 
 import jakarta.persistence.*;
+
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.SourceType;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -33,10 +35,9 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     private User author;
-    @Column(nullable = false, updatable = false)
-    @CreationTimestamp
+    @CreationTimestamp(source = SourceType.DB)
     private LocalDateTime createdAt;
-    @UpdateTimestamp
+    @LastModifiedDate
     private LocalDateTime updatedAt;
     @ManyToMany
     @JoinTable(
@@ -44,7 +45,6 @@ public class Post {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    @Column(nullable = false, insertable = false, updatable = false,  name = "category_id")
     private Set<Category> categories = new HashSet<>();
 
     public enum PostStatus {

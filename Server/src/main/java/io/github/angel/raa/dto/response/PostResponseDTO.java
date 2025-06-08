@@ -1,6 +1,5 @@
 package io.github.angel.raa.dto.response;
 
-import io.github.angel.raa.dto.request.category.CategoryDTO;
 import io.github.angel.raa.persistence.entity.Post;
 
 import java.io.Serializable;
@@ -11,7 +10,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PostResponseDTO implements Serializable {
-    private static final Long serialVersionUID = 21342872346236879l;
     private UUID postId;
     private String title;
     private String slug;
@@ -22,12 +20,12 @@ public class PostResponseDTO implements Serializable {
     private LocalDateTime updatedAt;
     private UUID authorId;
     private String authorName;
-    private Set<CategoryDTO> categories = new HashSet<>();
+    private Set<CategoryResponse> categories = new HashSet<>();
 
     public PostResponseDTO() {
     }
 
-    public PostResponseDTO(UUID postId, String title, String slug, String content, Post.PostStatus status, LocalDateTime publishedAt, LocalDateTime createdAt, LocalDateTime updatedAt, UUID authorId, String authorName, Set<CategoryDTO> categories) {
+    public PostResponseDTO(UUID postId, String title, String slug, String content, Post.PostStatus status, LocalDateTime publishedAt, LocalDateTime createdAt, LocalDateTime updatedAt, UUID authorId, String authorName, Set<CategoryResponse> categories) {
         this.postId = postId;
         this.title = title;
         this.slug = slug;
@@ -121,11 +119,11 @@ public class PostResponseDTO implements Serializable {
         this.authorName = authorName;
     }
 
-    public Set<CategoryDTO> getCategories() {
+    public Set<CategoryResponse> getCategories() {
         return categories;
     }
 
-    public void setCategories(Set<CategoryDTO> categories) {
+    public void setCategories(Set<CategoryResponse> categories) {
         this.categories = categories;
     }
 
@@ -141,6 +139,14 @@ public class PostResponseDTO implements Serializable {
                 post.getUpdatedAt(),
                 post.getAuthorId(),
                 post.getAuthor().getUsername(),
-                post.getCategories().stream().map(CategoryDTO::fromCategory).collect(Collectors.toSet()));
+                post.getCategories().stream().map(CategoryResponse::fromCategory).collect(Collectors.toSet()));
+    }
+
+    @Override
+    public String toString() {
+        return "PostResponseDTO [postId=" + postId + ", title=" + title + ", slug=" + slug + ", content=" + content
+                + ", status=" + status + ", publishedAt=" + publishedAt + ", createdAt=" + createdAt + ", updatedAt="
+                + updatedAt + ", authorId=" + authorId + ", authorName=" + authorName + ", categories=" + categories
+                + "]";
     }
 }
