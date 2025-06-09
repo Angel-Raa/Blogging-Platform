@@ -5,8 +5,8 @@ import io.github.angel.raa.dto.response.PostResponseDTO;
 import io.github.angel.raa.dto.response.Response;
 import io.github.angel.raa.service.PostService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,11 +25,11 @@ public class PostController {
     }
     @PreAuthorize("permitAll")
     @GetMapping
-    public ResponseEntity<Page<PostResponseDTO>> getAllPosts(
+    public ResponseEntity<PagedModel<PostResponseDTO>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<PostResponseDTO> posts = postService.getAllPosts(PageRequest.of(page, size));
+        PagedModel<PostResponseDTO> posts = postService.getAllPosts(PageRequest.of(page, size));
         System.out.println("Posts:   " + posts);
         return ResponseEntity.ok(posts);
 

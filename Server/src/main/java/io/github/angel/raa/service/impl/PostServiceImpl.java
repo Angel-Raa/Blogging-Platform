@@ -19,6 +19,7 @@ import io.github.angel.raa.utils.Slugify;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,9 +88,11 @@ public class PostServiceImpl implements PostService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
+    public PagedModel<PostResponseDTO> getAllPosts(Pageable pageable) {
         Page<Post> posts = postRepository.findAll(pageable);
-        return posts.map(PostResponseDTO::fromPost);
+        Page<PostResponseDTO> dtoPage = posts.map(PostResponseDTO::fromPost);
+        return PagedModel.of(dtoPage.getContent(), 
+                             new PagedModel.PageMetadata(dtoPage.getSize(), dtoPage.getNumber(), dtoPage.getTotalElements(), dtoPage.getTotalPages()));
     }
 
     @Override
