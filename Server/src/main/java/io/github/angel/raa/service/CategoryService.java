@@ -9,10 +9,13 @@ import org.springframework.hateoas.PagedModel;
 
 public interface CategoryService {
     Response<CategoryResponse> createCategory(CategoryDTO dto);
-    Response<CategoryResponse> updateCategory(CategoryDTO dto, String slug);
-    Response<CategoryResponse> getCategoryBySlug(String slug);
-    Response<String> deleteCategory(String slug);
-    PagedModel<EntityModel<CategoryResponse>> getAllCategories(Pageable pageable);
 
+    Response<CategoryResponse> updateCategory(CategoryDTO dto, String slug);
+
+    CategoryResponse getCategoryBySlug(String slug);
+
+    Response<String> deleteCategory(String slug);
+
+    PagedModel<EntityModel<CategoryResponse>> getAllCategories(Pageable pageable);
 
 }

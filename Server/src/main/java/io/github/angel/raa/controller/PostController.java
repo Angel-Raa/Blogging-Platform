@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @Validated
@@ -23,18 +22,19 @@ public class PostController {
     public PostController(PostService postService) {
         this.postService = postService;
     }
+
     @PreAuthorize("permitAll")
     @GetMapping
     public ResponseEntity<PagedModel<PostResponseDTO>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         PagedModel<PostResponseDTO> posts = postService.getAllPosts(PageRequest.of(page, size));
         System.out.println("Posts:   " + posts);
         return ResponseEntity.ok(posts);
 
     }
-    @GetMapping("/{slug}")
+
+    @GetMapping("/by-slug/{slug}")
     public ResponseEntity<PostResponseDTO> getPostBySlug(@PathVariable @Valid String slug) {
         if (slug == null || slug.isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -55,7 +55,5 @@ public class PostController {
         Response<PostResponseDTO> response = postService.createPost(postDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-
 
 }
