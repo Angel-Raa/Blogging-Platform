@@ -84,7 +84,7 @@ public class CategoryServiceImpl implements CategoryService {
         return body;
 
     }
-
+    
     @Override
     public Response<String> deleteCategory(String slug) {
         return null;
