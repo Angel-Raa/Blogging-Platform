@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,10 +83,23 @@ public class CategoryServiceImpl implements CategoryService {
         return body;
 
     }
-    
+
+    @Transactional
     @Override
     public Response<String> deleteCategory(String slug) {
-        return null;
+        if (slug == null || slug.trim().isEmpty()) {
+            throw new IllegalArgumentException("Slug cannot be empty");
+        }
+        Category category = repository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with slug: " + slug));
+
+        repository.delete(category);
+        return Response.<String>builder()
+                .code(204)
+                .data("Category deleted successfully")
+                .timestamp(now())
+                .message("")
+                .buildResponse();
     }
 
     @Transactional(readOnly = true)

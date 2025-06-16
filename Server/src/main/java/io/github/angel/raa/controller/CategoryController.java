@@ -5,17 +5,19 @@ import io.github.angel.raa.dto.response.CategoryResponse;
 import io.github.angel.raa.dto.response.Response;
 import io.github.angel.raa.service.CategoryService;
 import io.github.angel.raa.service.assemblers.CategoryModelAssembler;
+import io.github.angel.raa.utils.ResponseUtils;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestBody;
+
 @RestController
 @Validated
 @RequestMapping("/category")
@@ -42,7 +44,7 @@ public class CategoryController {
     @GetMapping("/{slug}")
     public ResponseEntity<EntityModel<CategoryResponse>> getCategoryBySlug(@PathVariable String slug) {
         CategoryResponse entityModelResponse = categoryService.getCategoryBySlug(slug);
-        System.out.println("slug:  "+ slug);
+        System.out.println("slug:  " + slug);
         var body = assembler.toModel(entityModelResponse);
         return ResponseEntity.ok(body);
     }
@@ -52,6 +54,17 @@ public class CategoryController {
     public ResponseEntity<Response<CategoryResponse>> createCategory(@Valid @RequestBody CategoryDTO category) {
         Response<CategoryResponse> response = categoryService.createCategory(category);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/{slug}")
+    public ResponseEntity<EntityModel<Response<String>>> delete(@PathVariable String slug) {
+        Response<String> response = categoryService.deleteCategory(slug);
+        HttpStatus status = ResponseUtils.mapToHttpStatus(response);
+        EntityModel<Response<String>> entityModel = EntityModel.of(response);
+        // Ejemplo de enlace: enlace a la lista de categorías
+        entityModel.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(CategoryController.class)
+                .getAllCategories(0, 10)).withRel("category/"));
+        return ResponseEntity.status(status).body(entityModel);
 
     }
 
