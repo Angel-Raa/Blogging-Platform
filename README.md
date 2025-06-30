@@ -1,6 +1,6 @@
 # Blogging Platform 🚀
 
-Una plataforma de blogs moderna construida con Spring Boot y React.
+Una plataforma de blogs moderna construida con Spring Boot y Vuejs.
 
 ## Características principales ✨
 
@@ -19,12 +19,12 @@ Una plataforma de blogs moderna construida con Spring Boot y React.
 - **Seguridad**: Spring Security
 - **API Docs**: Swagger
 
-### Frontend (React)
+### Frontend (Vuejs)
 - **Lenguaje**: TypeScript
-- **Framework**: React 19+
-- **Estado**: zustand
+- **Framework**: Vuejs
+- **Estado**: Pinia
 - **Estilos**: Tailwind
-- **Routing**: React Router DOM
+- **Routing**: Vuejs Router
 
 ## Requisitos previos 📋
 
