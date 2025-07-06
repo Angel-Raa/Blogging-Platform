@@ -1,6 +1,7 @@
 package io.github.angel.raa.controller;
 
 import io.github.angel.raa.dto.request.post.PostDto;
+import io.github.angel.raa.dto.request.post.PostUpdateDto;
 import io.github.angel.raa.dto.response.PostResponseDTO;
 import io.github.angel.raa.dto.response.Response;
 import io.github.angel.raa.service.PostService;
@@ -37,7 +38,8 @@ public class PostController {
 
     }
 
-    //TODO: SOLUCIONA EN ERROR 00 Internal Server Error CON LAS SERIALIZACIONES JSON
+    // TODO: SOLUCIONA EN ERROR 00 Internal Server Error CON LAS SERIALIZACIONES
+    // JSON
     @PreAuthorize("permitAll")
     @GetMapping(value = "/by-slug/{slug}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EntityModel<Response<PostResponseDTO>>> getPostBySlug(@PathVariable String slug) {
@@ -67,6 +69,20 @@ public class PostController {
         System.out.println("CategoryId: " + postDto.categoryId());
         Response<PostResponseDTO> response = postService.createPost(postDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR', 'USER')")
+    @PutMapping(value = "/{slug}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Response<PostResponseDTO>> updatePost(@Valid @RequestBody PostUpdateDto postDto,
+            @PathVariable String slug) {
+        System.out.println("Datos recibidos para actualizar:");
+        System.out.println("Title: " + postDto.title());
+        System.out.println("Content: " + postDto.content());
+        System.out.println("Status: " + postDto.status());
+        Response<PostResponseDTO> response = postService.updatePost(postDto, slug);
+        HttpStatus status = ResponseUtils.mapToHttpStatus(response);
+        
+        return ResponseEntity.status(status).body(response);
     }
 
 }

@@ -1,6 +1,7 @@
 package io.github.angel.raa.service.impl;
 
 import io.github.angel.raa.dto.request.post.PostDto;
+import io.github.angel.raa.dto.request.post.PostUpdateDto;
 import io.github.angel.raa.dto.response.CategoryResponse;
 import io.github.angel.raa.dto.response.PostResponseDTO;
 import io.github.angel.raa.dto.response.Response;
@@ -17,6 +18,8 @@ import io.github.angel.raa.persistence.repository.UserRepository;
 import io.github.angel.raa.service.AuthenticationService;
 import io.github.angel.raa.service.PostService;
 import io.github.angel.raa.utils.Slugify;
+import jakarta.persistence.PostUpdate;
+
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -77,10 +80,30 @@ public class PostServiceImpl implements PostService {
 
     }
 
+    @Transactional
     @Override
-    public Response<PostResponseDTO> updatePost(PostDto postDto, String slug) {
-        return null;
+    public Response<PostResponseDTO> updatePost(PostUpdateDto postDto, String slug) {
+        Post post = postRepository.findBySlug(slug)
+                .orElseThrow(() -> new SlugNotFoundException("Post not found"));
+        post.setTitle(postDto.title());
+        post.setSlug(Slugify.slugify(postDto.title()));
+        post.setContent(postDto.content());
+        post.setStatus(postDto.status());
+        post.setUpdatedAt(LocalDateTime.now());
+
+       
+        Post updatedPost = postRepository.save(post);
+        PostResponseDTO dto = mapEntityToDto(updatedPost);
+        return Response.<PostResponseDTO>builder()
+                .message("Post updated successfully")
+                .success(true)
+                .code(200)
+                .data(dto)
+                .timestamp(LocalDateTime.now())
+                .buildResponse();
     }
+
+    
 
     @Transactional(readOnly = true)
     @Override
@@ -101,8 +124,9 @@ public class PostServiceImpl implements PostService {
     public PagedModel<PostResponseDTO> getAllPosts(Pageable pageable) {
         Page<Post> posts = postRepository.findAll(pageable);
         Page<PostResponseDTO> dtoPage = posts.map(PostResponseDTO::fromPost);
-        return PagedModel.of(dtoPage.getContent(), 
-                             new PagedModel.PageMetadata(dtoPage.getSize(), dtoPage.getNumber(), dtoPage.getTotalElements(), dtoPage.getTotalPages()));
+        return PagedModel.of(dtoPage.getContent(),
+                new PagedModel.PageMetadata(dtoPage.getSize(), dtoPage.getNumber(), dtoPage.getTotalElements(),
+                        dtoPage.getTotalPages()));
     }
 
     @Override
