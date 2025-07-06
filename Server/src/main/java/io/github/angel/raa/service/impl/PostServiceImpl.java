@@ -6,6 +6,7 @@ import io.github.angel.raa.dto.response.PostResponseDTO;
 import io.github.angel.raa.dto.response.Response;
 import io.github.angel.raa.exception.DuplicateSlugException;
 import io.github.angel.raa.exception.DuplicateTitleException;
+import io.github.angel.raa.exception.SlugNotFoundException;
 import io.github.angel.raa.exception.UsernameNotFoundException;
 import io.github.angel.raa.persistence.entity.Category;
 import io.github.angel.raa.persistence.entity.Post;
@@ -81,9 +82,18 @@ public class PostServiceImpl implements PostService {
         return null;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Response<PostResponseDTO> getPostBySlug(String slug) {
-        return null;
+        Post post = postRepository.findBySlug(slug).orElseThrow(() -> new SlugNotFoundException("Post not found"));
+
+        return Response.<PostResponseDTO>builder()
+                .message("Post retrieved successfully")
+                .success(true)
+                .code(200)
+                .data(PostResponseDTO.fromPost(post))
+                .timestamp(LocalDateTime.now())
+                .buildResponse();
     }
 
     @Transactional(readOnly = true)

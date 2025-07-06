@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,7 +23,7 @@ public class Post {
     @Column(nullable = true, insertable = true, name = "user_id", updatable = true)
     private UUID authorId;
     @Column(nullable = true, insertable = true, name = "category_id")
-    private UUID  categoryId;
+    private UUID categoryId;
     @Column(nullable = false, unique = true)
     private String title;
     @Column(nullable = false, unique = true)
@@ -33,6 +35,7 @@ public class Post {
     private PostStatus status = PostStatus.DRAFT;
     private LocalDateTime publishedAt;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     private User author;
     @CreationTimestamp(source = SourceType.DB)
@@ -40,11 +43,7 @@ public class Post {
     @LastModifiedDate
     private LocalDateTime updatedAt;
     @ManyToMany
-    @JoinTable(
-            name = "post_categories",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
+    @JoinTable(name = "post_categories", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<Category> categories = new HashSet<>();
 
     public enum PostStatus {
@@ -54,7 +53,9 @@ public class Post {
     public Post() {
     }
 
-    public Post(UUID postId, UUID authorId, String title, String slug, String content, PostStatus status, LocalDateTime publishedAt, User author, LocalDateTime createdAt, LocalDateTime updatedAt, Set<Category> categories) {
+    public Post(UUID postId, UUID authorId, String title, String slug, String content, PostStatus status,
+            LocalDateTime publishedAt, User author, LocalDateTime createdAt, LocalDateTime updatedAt,
+            Set<Category> categories) {
         this.postId = postId;
         this.authorId = authorId;
         this.title = title;

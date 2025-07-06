@@ -10,6 +10,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PostResponseDTO implements Serializable {
+    private static final long serialVersionUID = -2367332115123472367L;
+
     private UUID postId;
     private String title;
     private String slug;
@@ -25,7 +27,9 @@ public class PostResponseDTO implements Serializable {
     public PostResponseDTO() {
     }
 
-    public PostResponseDTO(UUID postId, String title, String slug, String content, Post.PostStatus status, LocalDateTime publishedAt, LocalDateTime createdAt, LocalDateTime updatedAt, UUID authorId, String authorName, Set<CategoryResponse> categories) {
+    public PostResponseDTO(UUID postId, String title, String slug, String content, Post.PostStatus status,
+            LocalDateTime publishedAt, LocalDateTime createdAt, LocalDateTime updatedAt, UUID authorId,
+            String authorName, Set<CategoryResponse> categories) {
         this.postId = postId;
         this.title = title;
         this.slug = slug;

@@ -4,10 +4,13 @@ import io.github.angel.raa.dto.request.post.PostDto;
 import io.github.angel.raa.dto.response.PostResponseDTO;
 import io.github.angel.raa.dto.response.Response;
 import io.github.angel.raa.service.PostService;
+import io.github.angel.raa.utils.ResponseUtils;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -34,13 +37,23 @@ public class PostController {
 
     }
 
-    @GetMapping("/by-slug/{slug}")
-    public ResponseEntity<PostResponseDTO> getPostBySlug(@PathVariable @Valid String slug) {
-        if (slug == null || slug.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        PostResponseDTO post = postService.getPostBySlug(slug).getData();
-        return ResponseEntity.ok(post);
+    //TODO: SOLUCIONA EN ERROR 00 Internal Server Error CON LAS SERIALIZACIONES JSON
+    @PreAuthorize("permitAll")
+    @GetMapping(value = "/by-slug/{slug}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<EntityModel<Response<PostResponseDTO>>> getPostBySlug(@PathVariable String slug) {
+        System.out.println("Slug: " + slug);
+
+        Response<PostResponseDTO> response = postService.getPostBySlug(slug);
+        System.out.println("Post: " + response);
+        System.out.println("Slug: " + slug);
+        HttpStatus status = ResponseUtils.mapToHttpStatus(response);
+        EntityModel<Response<PostResponseDTO>> resource = EntityModel.of(response);
+        resource.add(
+                org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo(
+                        org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn(PostController.class)
+                                .getAllPosts(0, 10))
+                        .withRel("posts"));
+        return ResponseEntity.status(status).body(resource);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR', 'USER')")

@@ -98,6 +98,11 @@ public class Response <T> implements  Serializable{
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
+    @Override
+    public String toString() {
+        return "Response [message=" + message + ", data=" + data + ", success=" + success + ", code=" + code
+                + ", timestamp=" + timestamp + "]";
+    }
 
 
 
