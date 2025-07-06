@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +16,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "posts_table")
-public class Post {
+public class Post implements Serializable{
+    private static final long serialVersionUID = -2367332115123472367L;
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, name = "post_id")
@@ -43,6 +45,8 @@ public class Post {
     @LastModifiedDate
     private LocalDateTime updatedAt;
     @ManyToMany
+    @JsonIgnore
+    @OrderBy("name ASC")
     @JoinTable(name = "post_categories", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<Category> categories = new HashSet<>();
 

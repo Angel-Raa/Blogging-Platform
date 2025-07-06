@@ -9,20 +9,24 @@ import java.time.LocalDateTime;
 
 /**
  * Clase que representa una respuesta estándar para las solicitudes HTTP.
- * Contiene información sobre el estado de la operación, un mensaje y los datos de respuesta.
+ * Contiene información sobre el estado de la operación, un mensaje y los datos
+ * de respuesta.
+ * 
  * @param <T>
  */
-public class Response <T> implements  Serializable{
+public class Response<T> implements Serializable {
     private static final long serialVersionUID = -2367332115723472367L;
     private String message;
     private T data;
     private boolean success;
     private int code;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
-    private LocalDateTime  timestamp;
+    private LocalDateTime timestamp;
+
     public Response() {
         this.timestamp = LocalDateTime.now();
     }
+
     public Response(String message, T data, boolean success, int code) {
         this.message = message;
         this.data = data;
@@ -31,34 +35,42 @@ public class Response <T> implements  Serializable{
         this.timestamp = LocalDateTime.now();
     }
 
-
     public Response<T> message(String message) {
         this.message = message;
         return this;
     }
+
     public Response<T> data(T data) {
         this.data = data;
         return this;
     }
+
     public Response<T> success(boolean success) {
         this.success = success;
         return this;
     }
+
     public Response<T> code(int code) {
         this.code = code;
         return this;
     }
+
     public Response<T> timestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
         return this;
     }
+
     public Response<T> buildResponse() {
-        return new Response<T>(message, data, success, code);
+        Response<T> response = new Response<>(message, data, success, code);
+        response.setTimestamp(this.timestamp);
+        return response;
     }
+
     @Contract(" -> new")
     public static <T> @NotNull Response<T> builder() {
         return new Response<>();
     }
+
     public String getMessage() {
         return message;
     }
@@ -98,12 +110,11 @@ public class Response <T> implements  Serializable{
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
+
     @Override
     public String toString() {
         return "Response [message=" + message + ", data=" + data + ", success=" + success + ", code=" + code
                 + ", timestamp=" + timestamp + "]";
     }
-
-
 
 }

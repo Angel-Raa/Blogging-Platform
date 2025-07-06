@@ -7,6 +7,9 @@ import io.github.angel.raa.dto.response.Response;
 import io.github.angel.raa.service.PostService;
 import io.github.angel.raa.utils.ResponseUtils;
 import jakarta.validation.Valid;
+
+import java.util.UUID;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -58,6 +61,47 @@ public class PostController {
         return ResponseEntity.status(status).body(resource);
     }
 
+    // TODO: SOLUCIONA EN ERROR 00 Internal Server Error CON LAS SERIALIZACIONES
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR', 'USER')")
+    @GetMapping(value = "/{slug}/category")
+    public ResponseEntity<Response<String>> addCategoryToPost(@PathVariable String slug,
+            @RequestParam String categoryId) {
+        System.out.println("Slug: " + slug);
+        System.out.println("CategoryId: " + categoryId);
+        Response<String> responseError = new Response<>();
+        responseError.setMessage("Category ID cannot be null or empty");
+        responseError.setData(null);
+
+        if (categoryId == null || categoryId.isEmpty()) {
+            return ResponseEntity.badRequest().body(responseError);
+        }
+        UUID categoryIdUuid = UUID.fromString(categoryId);
+        System.out.println("CategoryId UUID: " + categoryIdUuid);
+        Response<String> response = postService.addCategoryToPost(slug, categoryIdUuid);
+        HttpStatus status = ResponseUtils.mapToHttpStatus(response);
+        return ResponseEntity.status(status).body(response);
+    }
+    // TODO: SOLUCIONA EN ERROR 00 Internal Server Error CON LAS SERIALIZACIONES
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR', 'USER')")
+    @DeleteMapping(value = "/{slug}/category")
+    public ResponseEntity<Response<String>> removeCategoryFromPost(@PathVariable String slug,
+            @RequestParam String categoryId) {
+        System.out.println("Slug: " + slug);
+        System.out.println("CategoryId: " + categoryId);
+        Response<String> responseError = new Response<>();
+        responseError.setMessage("Category ID cannot be null or empty");
+        responseError.setData(null);
+
+        if (categoryId == null || categoryId.isEmpty()) {
+            return ResponseEntity.badRequest().body(responseError);
+        }
+        UUID categoryIdUuid = UUID.fromString(categoryId);
+        System.out.println("CategoryId UUID: " + categoryIdUuid);
+        Response<String> response = postService.removeCategoryFromPost(slug, categoryIdUuid);
+        HttpStatus status = ResponseUtils.mapToHttpStatus(response);
+        return ResponseEntity.status(status).body(response);
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR', 'USER')")
     @PostMapping
     public ResponseEntity<Response<PostResponseDTO>> createPost(@Valid @RequestBody PostDto postDto) {
@@ -81,7 +125,7 @@ public class PostController {
         System.out.println("Status: " + postDto.status());
         Response<PostResponseDTO> response = postService.updatePost(postDto, slug);
         HttpStatus status = ResponseUtils.mapToHttpStatus(response);
-        
+
         return ResponseEntity.status(status).body(response);
     }
 

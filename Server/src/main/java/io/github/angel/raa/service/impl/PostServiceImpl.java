@@ -7,6 +7,7 @@ import io.github.angel.raa.dto.response.PostResponseDTO;
 import io.github.angel.raa.dto.response.Response;
 import io.github.angel.raa.exception.DuplicateSlugException;
 import io.github.angel.raa.exception.DuplicateTitleException;
+import io.github.angel.raa.exception.ResourceNotFoundException;
 import io.github.angel.raa.exception.SlugNotFoundException;
 import io.github.angel.raa.exception.UsernameNotFoundException;
 import io.github.angel.raa.persistence.entity.Category;
@@ -18,7 +19,6 @@ import io.github.angel.raa.persistence.repository.UserRepository;
 import io.github.angel.raa.service.AuthenticationService;
 import io.github.angel.raa.service.PostService;
 import io.github.angel.raa.utils.Slugify;
-import jakarta.persistence.PostUpdate;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -26,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.time.LocalDateTime.now;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -91,7 +93,6 @@ public class PostServiceImpl implements PostService {
         post.setStatus(postDto.status());
         post.setUpdatedAt(LocalDateTime.now());
 
-       
         Post updatedPost = postRepository.save(post);
         PostResponseDTO dto = mapEntityToDto(updatedPost);
         return Response.<PostResponseDTO>builder()
@@ -102,8 +103,6 @@ public class PostServiceImpl implements PostService {
                 .timestamp(LocalDateTime.now())
                 .buildResponse();
     }
-
-    
 
     @Transactional(readOnly = true)
     @Override
@@ -134,16 +133,46 @@ public class PostServiceImpl implements PostService {
         return null;
     }
 
+    @Transactional
     @Override
-    public Response<String> addCategoryToPost(String slug, Long categoryId) {
-        return null;
+    public Response<String> addCategoryToPost(String slug, UUID categoryId) {
+        Post post = postRepository.findBySlug(slug)
+                .orElseThrow(() -> new SlugNotFoundException("Post not found"));
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        post.getCategories().add(category);
+        postRepository.save(post);
+        // Recarga el post para asegurar que las relaciones se cargan correctament
+        
+
+
+        return Response.<String>builder()
+                .message("Category added to post successfully")
+                .success(true)
+                .code(200)
+                .data("Category added")
+                .timestamp(now())
+                .buildResponse();
     }
 
+    @Transactional
     @Override
-    public Response<String> removeCategoryFromPost(String slug, Long categoryId) {
-        return null;
+    public Response<String> removeCategoryFromPost(String slug, UUID categoryId) {
+        Post post = postRepository.findBySlug(slug)
+                .orElseThrow(() -> new SlugNotFoundException("Post not found"));
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        post.getCategories().remove(category);
+        postRepository.save(post);
+        return Response.<String>builder()
+                .message("Category removed from post successfully")
+                .success(true)
+                .code(200)
+                .data("Category removed")
+                .buildResponse();
     }
 
+    
     private Post mapDtoToPost(@NotNull PostDto postDto) {
         Post post = new Post();
         post.setTitle(postDto.title());
@@ -186,7 +215,7 @@ public class PostServiceImpl implements PostService {
         dto.setCreatedAt(save.getCreatedAt());
         dto.setUpdatedAt(save.getUpdatedAt());
         dto.setAuthorId(save.getAuthorId());
-        dto.setAuthorName(save.getAuthor().getUsername());
+        dto.setAuthorName(save.getAuthor() != null ? save.getAuthor().getUsername() : null);
         dto.setCategories(save.getCategories().stream()
                 .map(category -> new CategoryResponse(
                         category.getName(),
