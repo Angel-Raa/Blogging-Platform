@@ -41,7 +41,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("permitAll")
-    @GetMapping("/{slug}")
+    @GetMapping("/by-slug/{slug}")
     public ResponseEntity<EntityModel<CategoryResponse>> getCategoryBySlug(@PathVariable String slug) {
         CategoryResponse entityModelResponse = categoryService.getCategoryBySlug(slug);
         System.out.println("slug:  " + slug);
@@ -56,6 +56,7 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     @DeleteMapping("/{slug}")
     public ResponseEntity<EntityModel<Response<String>>> delete(@PathVariable String slug) {
         Response<String> response = categoryService.deleteCategory(slug);
