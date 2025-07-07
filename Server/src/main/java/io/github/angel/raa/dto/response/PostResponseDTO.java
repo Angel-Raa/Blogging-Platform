@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class PostResponseDTO implements Serializable {
     private static final long serialVersionUID = -2367332115123472367L;
 
@@ -22,6 +24,7 @@ public class PostResponseDTO implements Serializable {
     private LocalDateTime updatedAt;
     private UUID authorId;
     private String authorName;
+    @JsonFormat(shape = JsonFormat.Shape.ARRAY)
     private Set<CategoryResponse> categories = new HashSet<>();
 
     public PostResponseDTO() {

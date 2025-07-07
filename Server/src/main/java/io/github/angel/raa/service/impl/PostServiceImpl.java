@@ -31,6 +31,7 @@ import static java.time.LocalDateTime.now;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -155,6 +156,8 @@ public class PostServiceImpl implements PostService {
                 .buildResponse();
     }
 
+
+
     @Transactional
     @Override
     public Response<String> removeCategoryFromPost(String slug, UUID categoryId) {
@@ -216,15 +219,15 @@ public class PostServiceImpl implements PostService {
         dto.setUpdatedAt(save.getUpdatedAt());
         dto.setAuthorId(save.getAuthorId());
         dto.setAuthorName(save.getAuthor() != null ? save.getAuthor().getUsername() : null);
-        dto.setCategories(save.getCategories().stream()
+        dto.setCategories(save.getCategories() != null
+            ? save.getCategories().stream()
                 .map(category -> new CategoryResponse(
-                        category.getName(),
-                        category.getSlug(),
-                        category.getCategoryId()))
-                .collect(Collectors.toSet()));
-
+                    category.getName(),
+                    category.getSlug(),
+                    category.getCategoryId()))
+                .collect(Collectors.toSet())
+            : new HashSet<>());
         return dto;
-
     }
 
 }

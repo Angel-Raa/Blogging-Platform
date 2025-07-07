@@ -36,7 +36,6 @@ public class PostController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         PagedModel<PostResponseDTO> posts = postService.getAllPosts(PageRequest.of(page, size));
-        System.out.println("Posts:   " + posts);
         return ResponseEntity.ok(posts);
 
     }
@@ -49,8 +48,6 @@ public class PostController {
         System.out.println("Slug: " + slug);
 
         Response<PostResponseDTO> response = postService.getPostBySlug(slug);
-        System.out.println("Post: " + response);
-        System.out.println("Slug: " + slug);
         HttpStatus status = ResponseUtils.mapToHttpStatus(response);
         EntityModel<Response<PostResponseDTO>> resource = EntityModel.of(response);
         resource.add(
@@ -81,6 +78,8 @@ public class PostController {
         HttpStatus status = ResponseUtils.mapToHttpStatus(response);
         return ResponseEntity.status(status).body(response);
     }
+    
+
     // TODO: SOLUCIONA EN ERROR 00 Internal Server Error CON LAS SERIALIZACIONES
     @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR', 'USER')")
     @DeleteMapping(value = "/{slug}/category")

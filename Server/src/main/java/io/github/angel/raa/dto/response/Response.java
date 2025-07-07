@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -17,7 +18,8 @@ import java.time.LocalDateTime;
 public class Response<T> implements Serializable {
     private static final long serialVersionUID = -2367332115723472367L;
     private String message;
-    private T data;
+    @Serial
+    private transient T data;
     private boolean success;
     private int code;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
